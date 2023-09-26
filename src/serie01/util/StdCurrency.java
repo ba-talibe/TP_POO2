@@ -3,7 +3,7 @@ package serie01.util;
 public class StdCurrency implements Currency{
 	private final CurrencyId id;
 	private  double rate;
-	StdCurrency(CurrencyId id, double r){
+	public StdCurrency(CurrencyId id, double r){
 		assert r > 0 && id != null;
 		this.id = id;
 		this.rate = r;
