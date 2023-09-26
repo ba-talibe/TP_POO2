@@ -62,6 +62,8 @@ import java.io.IOException;
  *     canSplit() ==> |getSplitsSizes()| == 1 </pre>
  */
 public interface SplitManager {
+	
+	
     
     // CONSTANTES
    
