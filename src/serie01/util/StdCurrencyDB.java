@@ -6,7 +6,7 @@ public class StdCurrencyDB  implements CurrencyDB{
 	
 	protected final Currency[] currencies  = new Currency[176];
 	
-	 StdCurrencyDB() {
+	public StdCurrencyDB() {
 		//initialiser la base de données ici 
 	}
 	

@@ -1,7 +1,15 @@
 package serie02.model;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import serie02.util.FileStateTester;
 import java.math.*;
 import java.util.*;
@@ -94,20 +102,94 @@ public class StdSplitManager implements SplitManager {
 
 	@Override
 	public void setSplitsSizes(long size) {
+		Contract.checkCondition(canSplit());
+		Contract.checkCondition(getMinFragmentSize() <= size);
+		Contract.checkCondition(size <= this.file.length());
 		
+		double k = Math.floor(this.file.length() / size);
+		double r = this.file.length() % size;
+		double splitsNb = (r == 0) ? k : k + 1;
+		for (double i=0; i<splitsNb-1; i++){
+			this.sizes.add(size);
+		}
+		this.sizes.add((int) splitsNb, (r == 0) ? size : (long) r);
 
+	}
+
+	private long sumSizes(long[] sizes){
+		Contract.checkCondition(sizes != null);
+		long sum=0;
+		for (int i=0;i<sizes.length;i++){
+			sum += sizes[i];
+		}
+		return sum;
 	}
 
 	@Override
 	public void setSplitsSizes(long[] sizes) {
+		Contract.checkCondition(canSplit());
+		Contract.checkCondition(sizes != null);
+		Contract.checkCondition(sizes.length >= 1);
+		Contract.checkCondition(sizes.length < getMaxFragmentNb());
+		for (int i=0;i<sizes.length;i++){
+			Contract.checkCondition(sizes[i] >= getMinFragmentSize());
+			Contract.checkCondition(sizes[i] < this.file.length());
+		}
+		long sum = sumSizes(sizes);
+		long n = getFile().length();
+		if ( sum <= n){
+			for (int i=0;i<sizes.length;i++){
+				this.sizes.add(sizes[i]);
+			}
+			long lastSize = sum - n;
+			if (lastSize > 0)
+				this.sizes.add(lastSize);
+			
+		}else{
+			sum = 0;
+			for (int i=0;i<sizes.length;i++){
+				this.sizes.add(sizes[i]);
+				sum += sizes[i];
+				if (sum >= n){
+					if (sum == n)
+						break;
+					this.sizes.add(i, n -(sum - sizes[i]));
+					break;
+				}
+			}
+		}
 		
+	}
 
+	private InputStream createInputStream() throws FileNotFoundException{
+		return new BufferedInputStream(
+			new FileInputStream(getFile())
+			);
+
+	}
+	private OutputStream createOutputstream(long n) throws FileNotFoundException{
+		return new BufferedOutputStream(
+			new FileOutputStream(getFile().getAbsolutePath() + "." + n)
+		);
 	}
 
 	@Override
 	public void split() throws IOException {
+		Contract.checkCondition(canSplit());
+		InputStream input = createInputStream();
+		OutputStream output;
 		
+		for ( int i=0;i<this.sizes.size(); i++){
+			long size = this.sizes.get(i);
+			byte[] readBytes = new byte[(int) size];
+			if (input.read(readBytes) != -1){
+				output = createOutputstream(i);
+				output.write(readBytes);
+			}else{
+				throw new IOException();
+			}
 
+		}
 	}
 
 }
