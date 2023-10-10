@@ -1,6 +1,8 @@
 package serie03.cmd;
 
+import serie03.StdText;
 import serie03.Text;
+import util.Contract;
 
 /**
  * @inv <pre>
@@ -31,16 +33,34 @@ class InsertLine extends AbstractCommand {
      *     getLine().equals(line)
      *     isRelevantForText() </pre>
      */
+	private final int index;
+    private Text text;
+    private Text oldText;
+    private String line;
+    private boolean done;
+
     InsertLine(Text text, int numLine, String line) {
         // ...
     	super(text);
+        Contract.checkCondition(text != null);
+        Contract.checkCondition(line != null);
+        Contract.checkCondition(1 <= numLine && numLine <= text.getLinesNb() + 1);
+        this.text = text;
+        this.index = numLine;
+        this.line = line;
     }
     
     // REQUETES
     
     @Override
     public boolean isRelevantForText() {
-		return false;
+    	if (done()) {
+    		return  index <= getText().getLinesNb() && line.equals(text.getLine(index));
+    	}else {
+    		return index <= getText().getLinesNb()+1;
+      	}
+    	
+        
         // ...
     }
     
@@ -48,7 +68,7 @@ class InsertLine extends AbstractCommand {
      * Le rang où l'on doit insérer la ligne dans le texte.
      */
     int getIndex() {
-		return 0;
+		return index;
         // ...
     }
     
@@ -56,12 +76,12 @@ class InsertLine extends AbstractCommand {
      * La ligne à insérer.
      */
     String getLine() {
-		return null;
+		return line;
         // ...
     }
     
     // COMMANDES
-    
+
     /**
      * Exécute l'insertion de la chaîne dans le texte.
      * @post <pre>
@@ -76,7 +96,17 @@ class InsertLine extends AbstractCommand {
      */
     @Override
     protected void doIt() {
-        // ...
+        Text newText = new StdText();
+        for (int i=1; i< getIndex(); i++){
+            newText.insertLine(i, text.getLine(i));
+        }
+        newText.insertLine(getIndex(), line);
+        for (int i=getIndex() ;i<= text.getLinesNb();i++){
+            newText.insertLine(i+1, text.getLine(i));
+        }
+        
+        text = newText;
+        done = true;
     }
     
     /**
@@ -92,6 +122,14 @@ class InsertLine extends AbstractCommand {
      */
     @Override
     protected void undoIt() {
-        // ...
+        Text newText = new StdText();
+        for (int i=1; i< getIndex(); i++){
+            newText.insertLine(i, text.getLine(i));
+        }
+        for (int i=getIndex();i< text.getLinesNb();i++){
+            newText.insertLine(i, text.getLine(i+1));
+        }
+        text = newText;
+        done = false;
     }
 }

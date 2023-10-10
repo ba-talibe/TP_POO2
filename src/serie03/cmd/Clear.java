@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import serie03.Text;
+import util.Contract;
 
 /**
  * @inv <pre>
@@ -27,9 +28,19 @@ class Clear extends AbstractCommand {
      *     !done()
      *     getBackup().size() == 0 </pre>
      */
+    private boolean done;
+    
+    private Text text;
+
+    private List<String> backup = new ArrayList<String>();
+    
     Clear(Text text) {
         // ...
+      
     	super(text);
+    	Contract.checkCondition(text != null);
+    	this.text = text;
+    	done = false;
     }
     
     // REQUETES
@@ -38,14 +49,20 @@ class Clear extends AbstractCommand {
      * La liste des lignes composant le texte juste avant d'exécuter undoIt.
      */
     List<String> getBackup() {
-		return null;
+      
+      for (int lineNum = 1;lineNum <= this.text.getLinesNb(); lineNum++){
+        backup.add(text.getLine(lineNum));
+      }
+	  return backup;
         
     }
     
     @Override
     public boolean isRelevantForText() {
-		return false;
-        
+    	if(!done()) {
+    		return text.getLinesNb() > 0;
+    	}
+		return true;
     }
     
     // COMMANDES
@@ -60,7 +77,9 @@ class Clear extends AbstractCommand {
      */
     @Override
     protected void doIt() {
-        // ...
+        backup = getBackup();
+        text.clear();
+        done = true;
     }
     
     /**
@@ -72,6 +91,10 @@ class Clear extends AbstractCommand {
      */
     @Override
     protected void undoIt() {
-        // ...
+       for (int lineNum = 1;lineNum <= backup.size(); lineNum++){
+        text.insertLine(lineNum, backup.get(lineNum-1));;
+      }
+      backup.clear();
+      done = false;
     }
 }
