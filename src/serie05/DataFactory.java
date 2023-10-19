@@ -52,9 +52,9 @@ class DataFactory<C extends Contact & Comparable<C>, N extends PhoneNumber> {
         } catch (IllegalAccessException e) {
             throw new Error("La classe StdContact n'est pas concrète", e);
         } catch (InvocationTargetException e) {
-            throw new Error("Le constructeur de StdContact a levé"
-                    + " une exception",
-                    e);
+//            throw new Error("Le constructeur de StdContact a levé"
+//                    + " une exception",
+//                    e);
         }
         return result;
     }
