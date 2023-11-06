@@ -62,21 +62,36 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
 
     @Override
     public boolean canGetChange() {
-        return changeBox != null;
+        for (int i =1; i<= 199; i++){
+            if (cashBox.computeChange(i) == null){
+                return false;
+            }
+        }
+        return true; // pas encore
     }
 
     @Override
     public void selectDrink(DrinkTypes d) {
         Contract.checkCondition(d != null);
-        lastDrink = DrinkTypes.values()[d.ordinal()];
+		Contract.checkCondition(getDrinkNb(d) >= 1);
+		Contract.checkCondition(getCreditAmount() >= d.getPrice());
+		Contract.checkCondition(getLastDrink() == null);
+		drinksStock.removeElement(d);
+        if(canGetChange()){
+        	changeBox=cashBox.computeChange(getChangeAmount()+getCreditAmount()-d.getPrice());
+        	changeBox.addAmount(toMoneyAmount(d.getPrice()));
+        }else {
+        	cashBox.addAmount(creditBox);
+        }
+        lastDrink=d;
+        creditBox.reset();
     }
 
     @Override
     public void fillStock(DrinkTypes d, int q) {
         Contract.checkCondition(d != null);
         Contract.checkCondition(q > 0);
-        Contract.checkCondition(getDrinkNb(d) + q >= MAX_DRINK);
-
+        Contract.checkCondition(getDrinkNb(d) + q <= MAX_DRINK);
         drinksStock.addElement(d, q);
     }
 
@@ -84,8 +99,7 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
     public void fillCash(CoinTypes c, int q) {
         Contract.checkCondition(c != null);
         Contract.checkCondition(q > 0);
-        Contract.checkCondition(getCashNb(c) + getCreditNb(c) + q >= MAX_COIN);
-
+        Contract.checkCondition(getCashNb(c) + getCreditNb(c) + q <= MAX_COIN);
         cashBox.addElement(c, q);
     }
 
@@ -112,6 +126,7 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
 
     @Override
     public void takeChange() {
+        creditBox.reset();
         changeBox.reset();
     }
 
@@ -123,5 +138,20 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
        lastDrink = null;
        drinksStock.reset();
     }
+
+    //outils 
+    private MoneyAmount toMoneyAmount(int amount) {
+        CoinTypes[] x=CoinTypes.values();
+        MoneyAmount money=new StdMoneyAmount();
+        int i=x.length-1;
+        int q=0;
+        while(i>=0 && amount>0) {
+            q=(int) Math.floor(amount/x[i].getFaceValue());
+            money.addElement(x[i], q);
+            amount-=q*x[i].getFaceValue();
+            i--;
+        }
+        return money;
+}
     
 }

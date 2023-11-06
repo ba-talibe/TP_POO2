@@ -23,7 +23,6 @@ public abstract class AbstractAlgo implements ChangeAlgorithm{
     @Override
     public MoneyAmount getChange() {
         Contract.checkCondition(solutionFound());
-
         return solution;
     }
 
@@ -34,7 +33,7 @@ public abstract class AbstractAlgo implements ChangeAlgorithm{
 
     //outils
     protected CoinTypes getCoinI(int i){
-        Contract.checkCondition(i < CoinTypes.values().length);
-        return CoinTypes.values()[i];
+        Contract.checkCondition(i <= CoinTypes.values().length);
+        return CoinTypes.values()[i-1];
     }
 }
