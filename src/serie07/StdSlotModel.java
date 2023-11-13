@@ -73,12 +73,11 @@ public class StdSlotModel  extends Observable implements   SlotModel {
 		Random r = new Random();
 		result = "";
 		for (int i=0; i<this.credit.length; i++) {
-			result += (char) (r.nextInt(26) + (r.nextInt(26) + (int) 'A'));
+			result += (char) (r.nextInt(26) + (int) 'A');
 		}
-		Pattern pattern ;
+		Pattern pattern;
 		Matcher matcher;
 		int maxNbOcc = 0;
-		int[] gainArr =  new int[this.size()];
 		for (int i=0; i<this.size(); i++) {
 			pattern = Pattern.compile("[^" + result.charAt(i) + "]*" + result.charAt(i));
 			matcher = pattern.matcher(result);
@@ -94,6 +93,7 @@ public class StdSlotModel  extends Observable implements   SlotModel {
 		this.moneyWon += this.lastPayout;
 		this.moneyLost += 1;
 		
+		setChanged();
 		notifyObservers();
 	}
 	

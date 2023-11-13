@@ -71,6 +71,7 @@ public class StdSwellingModel extends Observable implements SwellingModel {
 	public void scaleCurrent(double f) {
 		Contract.checkCondition(this.isValidScaleFactor(f));
 		this.dimension.setSize(this.dimension.getWidth()* (1 + f / 100), this.dimension.getHeight()* (1 + f / 100));
+		setChanged();
 		notifyObservers();
 	}
 
@@ -81,6 +82,7 @@ public class StdSwellingModel extends Observable implements SwellingModel {
 		Contract.checkCondition(this.dimComparator(d, this.maxDimension) <= 0 );
 		Contract.checkCondition(this.dimComparator(this.minDimension, d) <= 0 );
 		this.dimension.setSize(d.getWidth(), d.getHeight()); 
+		setChanged();
 		notifyObservers();
 	}
 
@@ -97,6 +99,7 @@ public class StdSwellingModel extends Observable implements SwellingModel {
 		if ( !(this.dimComparator(this.dimension, this.maxDimension) <= 0)) {
 			this.dimension.setSize(d.getWidth(), d.getHeight()); 
 		}
+		setChanged();
 		notifyObservers();
 	}
 
@@ -112,6 +115,7 @@ public class StdSwellingModel extends Observable implements SwellingModel {
 		if (this.dimComparator(this.maxDimension, d) <= 0) {
 			this.maxDimension.setSize(d.getWidth(), d.getHeight());
 		}
+		setChanged();
 		notifyObservers();
 
 	}
