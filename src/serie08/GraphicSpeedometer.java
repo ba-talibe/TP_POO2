@@ -38,7 +38,5 @@ public class GraphicSpeedometer extends JComponent {
 		
 	}
 	
-	public SpeedometerModel getModel() {
-		return model;
-	}
+
 }
