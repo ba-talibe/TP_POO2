@@ -61,7 +61,8 @@ public class StdSpeedometerModel extends Observable implements SpeedometerModel 
 		}
 		
 		this.currentUnit =  unit;
-		
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
@@ -91,7 +92,6 @@ public class StdSpeedometerModel extends Observable implements SpeedometerModel 
 		this.speed =0;
 		this.isOn = false;
 		
-
 		setChanged();
 		notifyObservers();
 	}
