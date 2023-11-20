@@ -1,8 +1,10 @@
 package serie06;
 
+import java.util.Observable;
+
 import util.Contract;
 
-public class StdDrinksMachineModel implements DrinksMachineModel{
+public class StdDrinksMachineModel extends Observable implements DrinksMachineModel{
 
     private MoneyAmount cashBox = new StdMoneyAmount();
     private MoneyAmount creditBox = new StdMoneyAmount();
@@ -13,6 +15,13 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
     public StdDrinksMachineModel(){
         for (DrinkTypes c : DrinkTypes.values()){
             drinksStock.addElement(c, MAX_DRINK);
+        }
+    }
+
+    public StdDrinksMachineModel(int max){
+        if(max < 5) max =5;
+        for (DrinkTypes c : DrinkTypes.values()){
+            drinksStock.addElement(c, max);
         }
     }
 
@@ -85,6 +94,9 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
         }
         lastDrink=d;
         creditBox.reset();
+        
+        setChanged();
+        notifyObservers();
     }
 
     @Override
@@ -93,6 +105,9 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
         Contract.checkCondition(q > 0);
         Contract.checkCondition(getDrinkNb(d) + q <= MAX_DRINK);
         drinksStock.addElement(d, q);
+
+        setChanged();
+        notifyObservers();
     }
 
     @Override
@@ -101,6 +116,9 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
         Contract.checkCondition(q > 0);
         Contract.checkCondition(getCashNb(c) + getCreditNb(c) + q <= MAX_COIN);
         cashBox.addElement(c, q);
+
+        setChanged();
+        notifyObservers();
     }
 
     @Override
@@ -111,32 +129,48 @@ public class StdDrinksMachineModel implements DrinksMachineModel{
         }else{
             creditBox.addElement(c);
         }
+
+        setChanged();
+        notifyObservers();
     }
 
     @Override
     public void cancelCredit() {
        changeBox.addAmount(creditBox);
        creditBox.reset();
+
+       setChanged();
+       notifyObservers();
     }
 
     @Override
     public void takeDrink() {
         lastDrink = null;
+        
+        setChanged();
+        notifyObservers();
     }
 
     @Override
     public void takeChange() {
         creditBox.reset();
         changeBox.reset();
+
+        setChanged();
+        notifyObservers();
     }
 
     @Override
     public void reset() {
-       changeBox.reset();
-       creditBox.reset();
-       cashBox.reset();
-       lastDrink = null;
-       drinksStock.reset();
+        changeBox.reset();
+        creditBox.reset();
+        cashBox.reset();
+        lastDrink = null;
+        drinksStock.reset();
+
+
+        setChanged();
+        notifyObservers();
     }
 
     //outils 
