@@ -24,7 +24,9 @@ public class GreedyAlgo  extends AbstractAlgo{
         	if (cash.getNumber(getCoinI(i)) > 0) {
         		int q = Math.min(cash.getNumber(getCoinI(i)), (int) Math.floor(s/getCoinI(i).getFaceValue()));
                 s -= q * getCoinI(i).getFaceValue();
-                solution.addElement(getCoinI(i), q);
+                if (q > 0){
+                    solution.addElement(getCoinI(i), q);
+                }
         	}
             i--;
         }
