@@ -30,8 +30,6 @@ public class DrinksMachine {
 	private JTextField coinInput, drinkOutput, changeOutput;
 	private JLabel changeInfo, creditInfo;
 
-	private ActionListener selectDrinkListener;
-	private ActionListener insertCoinListener;
 
 	public DrinksMachine(){
 		createModel();
@@ -120,8 +118,20 @@ public class DrinksMachine {
     }
 
 
-	private void connectControllers(){
 
+	private void connectControllers(){
+		((Observable) model).addObserver(new Observer() {
+			
+			@Override
+			public void update(Observable o, Object obj) {
+				refresh();
+			}
+		});
+		
+		
+		this.createController();
+		
+		
 	}
 
 	private void refresh(){
@@ -143,7 +153,7 @@ public class DrinksMachine {
 		}
 	}
 	private void createController(){
-		selectDrinkListener = new ActionListener() {
+		ActionListener selectDrinkListener = new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent e){
 				JButton drinkButton = (JButton) e.getSource();
@@ -170,8 +180,12 @@ public class DrinksMachine {
 				}
 			}
 		};
+		
+		for (DrinkTypes drink : DrinkTypes.values()){
+			drinks.get(drink).addActionListener(selectDrinkListener);
+		}
 
-		insertCoinListener = new ActionListener() {
+		ActionListener insertCoinListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e){
 				String cointText = coinInput.getText();
@@ -186,12 +200,42 @@ public class DrinksMachine {
 				}else{
 					CoinTypes coinInserted = CoinTypes.getCoinType(Integer.parseInt(cointText));
 					if (coinInserted == null){
-
+						JOptionPane.showMessageDialog(
+								null, 
+								"Veillez inserer un piece existante correct",
+								"Erreur !",
+								JOptionPane.ERROR_MESSAGE
+	                    	);
+						coinInput.selectAll();
+					}else {
+						model.insertCoin(coinInserted);
+						coinInput.setText("");
 					}
 				}
 	
 			}
 		};
+		
+		this.insertBtn.addActionListener(insertCoinListener);
+		
+		this.cancelBtn.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				model.cancelCredit();
+			}
+		}); 
+		
+		this.consumeBtn.addActionListener(new ActionListener() {
+			
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				model.takeDrink();
+				model.takeChange();
+				
+			}
+		});
 	}
 
 	private JFrame createFrame() {
