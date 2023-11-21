@@ -1,8 +1,10 @@
 package serie06;
 
 import util.Contract;
+import java.util.Observable;
+import java.util.Observer;
 
-public class StdDrinksMachineModel implements DrinksMachineModel {
+public class StdDrinksMachineModel extends Observable implements DrinksMachineModel {
 	
 	// ATTRIBUTS
 	
@@ -18,6 +20,16 @@ public class StdDrinksMachineModel implements DrinksMachineModel {
 		drinksStock = new StdStock<DrinkTypes>(DrinkTypes.class);
 		for (DrinkTypes elem : DrinkTypes.values()) {
 	           drinksStock.addElement(elem, MAX_DRINK);
+	       }
+		cashbox = new StdMoneyAmount();
+		changebox = new StdMoneyAmount();
+		creditbox = new StdMoneyAmount();
+	}
+	
+	public StdDrinksMachineModel(int max) {
+		drinksStock = new StdStock<DrinkTypes>(DrinkTypes.class);
+		for (DrinkTypes elem : DrinkTypes.values()) {
+	           drinksStock.addElement(elem, max);
 	       }
 		cashbox = new StdMoneyAmount();
 		changebox = new StdMoneyAmount();
@@ -105,16 +117,21 @@ public class StdDrinksMachineModel implements DrinksMachineModel {
     	
     	if(value > 0 && canGetChange()) {
     		
-    		MoneyAmount montantbox = cashbox.computeChange(value - d.getPrice());
+    		if (value - d.getPrice() > 0) {
+    			MoneyAmount montantbox = cashbox.computeChange(value - d.getPrice());
+    			changebox.addAmount(montantbox);
+        		cashbox.removeAmount(montantbox);
+    		}
     		
-    		changebox.addAmount(montantbox);
-    		cashbox.removeAmount(montantbox);
+    		
 
     	}
     	
     	creditbox.reset();
     	lastDrink = d;
     	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
@@ -127,6 +144,9 @@ public class StdDrinksMachineModel implements DrinksMachineModel {
 				"Vous avez depasser la quantité maximum reservé pour cette boisson dans le stock");
     	
     	drinksStock.addElement(d, q);
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
@@ -139,6 +159,9 @@ public class StdDrinksMachineModel implements DrinksMachineModel {
 				"Vous avez depasser la quantité maximum reservé pour cette pièce dans le stock");
     	
     	cashbox.addElement(c, q);
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
@@ -147,22 +170,34 @@ public class StdDrinksMachineModel implements DrinksMachineModel {
     			"Vous n'avez pas entrez un type de pièce");
     	if(getCashNb(c) + getCreditNb(c) == MAX_COIN) changebox.addElement(c);
     	else creditbox.addElement(c);
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
     public void cancelCredit() {
     	changebox.addAmount(creditbox);
     	creditbox.reset();
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
     public void takeDrink() {
     	lastDrink = null;
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
     public void takeChange() {
     	changebox.reset();
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
     @Override
@@ -172,53 +207,10 @@ public class StdDrinksMachineModel implements DrinksMachineModel {
     	creditbox.reset();
     	lastDrink = null;
     	drinksStock.reset();
+    	
+    	setChanged();
+    	notifyObservers();
     }
     
-    
-    
-    public static void main(String[] args) {
-		
-		DrinksMachineModel d = new StdDrinksMachineModel();
-		
-		d.fillCash(CoinTypes.ONE, 100);
-		d.fillCash(CoinTypes.TWO, 50);
-		d.fillCash(CoinTypes.FIVE, 50);
-		d.fillCash(CoinTypes.TEN, 50);
-		d.fillCash(CoinTypes.TWENTY, 50);
-		d.fillCash(CoinTypes.FIFTY, 50);
-		d.fillCash(CoinTypes.ONE_HUNDRED, 10);
-		d.fillCash(CoinTypes.TWO_HUNDRED, 5);
-		
-		System.out.println(d.getCashAmount());
-		System.out.println("XXXXXXXX");
-		
-    	
-    	d.insertCoin(CoinTypes.TEN);
-    	d.insertCoin(CoinTypes.TWENTY);
-    	d.insertCoin(CoinTypes.TWENTY);
-    	System.out.println(d.getCreditAmount());
-    	
-    	d.selectDrink(DrinkTypes.CHOCOLATE);
-    	
-    	d.takeDrink();
-    	
-    	System.out.println(d.getCashAmount());
-    	System.out.println(d.getCreditAmount());
-    	System.out.println(d.getChangeAmount());
-    	
-    	
-    	d.insertCoin(CoinTypes.ONE);
-    	d.insertCoin(CoinTypes.FIFTY);
-    	d.selectDrink(DrinkTypes.COFFEE);
-    	d.cancelCredit();
-    	
-    	System.out.println("XXXXXXXX");
-    	System.out.println(d.getCashAmount());
-    	System.out.println(d.getCreditAmount());
-    	System.out.println(d.getChangeAmount());
-    	System.out.println(d.getDrinkNb(DrinkTypes.CHOCOLATE));
-    	
-    	
-    }
     
 }

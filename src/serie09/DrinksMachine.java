@@ -39,7 +39,7 @@ public class DrinksMachine {
 		placeComponents();
 		createController();
 		connectControllers();
-	}
+	} 
 
 	private void placeComponents(){
 		frame.setLayout(new BorderLayout());
@@ -127,18 +127,19 @@ public class DrinksMachine {
 				refresh();
 			}
 		});
-		
-		
-		this.createController();
-		
+
 		
 	}
 
 	private void refresh(){
 		DrinkTypes lastDrink = model.getLastDrink();
 		if (lastDrink != null){
+			System.out.println(lastDrink.toString());
 			drinkOutput.setText(lastDrink.toString());
 			changeOutput.setText(Integer.toString(model.getChangeAmount()));
+		}else {
+			drinkOutput.setText("");
+			changeOutput.setText("");
 		}
 
 		changeInfo.setText(model.canGetChange() ? "Cet machine rend la monnaie" : "Cet machine ne rend pas la monnaie");
@@ -152,20 +153,24 @@ public class DrinksMachine {
 			}
 		}
 	}
+	
 	private void createController(){
 		ActionListener selectDrinkListener = new ActionListener() {
 			@Override
 			public void actionPerformed (ActionEvent e){
 				JButton drinkButton = (JButton) e.getSource();
 				String drink_name = drinkButton.getText();
+				System.out.println("bouton appuiye" + drink_name);
 				DrinkTypes selectedDrink = null;
 				for (DrinkTypes drink : DrinkTypes.values()){
-					if(drink.toString() == drink_name){
+					System.out.println("boisson " + drink.toString());
+					if(drink.toString().equals(drink_name) ){
 						selectedDrink = drink;
 						break;
 					}
 				}
-				if (selectedDrink != null  && model.getCreditAmount() >= selectedDrink.getPrice()){
+				System.out.println("boisson trouvé " + selectedDrink);
+				if ( model.getCreditAmount() >= selectedDrink.getPrice()){
 					if (model.getLastDrink() != null){
 						JOptionPane.showMessageDialog(
 							null, 
@@ -177,6 +182,13 @@ public class DrinksMachine {
 						model.selectDrink(selectedDrink);
 					}
 					
+				}else {
+					JOptionPane.showMessageDialog(
+							null, 
+							"Vous n'avez pas assez de credit pour acheté ce boisson",
+							"Erreur !",
+							JOptionPane.ERROR_MESSAGE
+                    	);
 				}
 			}
 		};
@@ -189,11 +201,11 @@ public class DrinksMachine {
 			@Override
 			public void actionPerformed(ActionEvent e){
 				String cointText = coinInput.getText();
-				
-				if (cointText == null  || !cointText.matches("[\\d]")){
+				System.out.println("insertCoinListener "+ cointText);
+				if (cointText == null  || !cointText.matches("[\\d]+")){
 					JOptionPane.showMessageDialog(
 							null, 
-							"Veillez inserer un piece existante correct",
+							"Veillez inserer une montant correct",
 							"Erreur !",
 							JOptionPane.ERROR_MESSAGE
                     	);
@@ -249,10 +261,10 @@ public class DrinksMachine {
 	}
 
 	private void createModel(){
-		model = new StdDrinksMachineModel(10);
-		// for (CoinTypes c : CoinTypes.values()){
-		// 	model.fillCash(c, 5);
-		// }
+		model = new StdDrinksMachineModel(20);
+		for (CoinTypes c : CoinTypes.values()){
+			model.fillCash(c, 5);
+		}
 		System.out.println(model.canGetChange());
 	}
 
@@ -273,10 +285,10 @@ public class DrinksMachine {
 		coinInput.setEnabled(true);
 		coinInput.setColumns(5);
 		drinkOutput = new JTextField();
-		drinkOutput.setEnabled(false); 
+		drinkOutput.setEditable(false);
 		drinkOutput.setColumns(15);
 		changeOutput= new JTextField();
-		changeOutput.setEnabled(false);
+		changeOutput.setEditable(false);
 		changeOutput.setColumns(5);
 
 		// creation des info label
