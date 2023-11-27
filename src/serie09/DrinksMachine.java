@@ -127,20 +127,18 @@ public class DrinksMachine {
 				refresh();
 			}
 		});
-
-		
 	}
 
 	private void refresh(){
 		DrinkTypes lastDrink = model.getLastDrink();
 		if (lastDrink != null){
-			System.out.println(lastDrink.toString());
 			drinkOutput.setText(lastDrink.toString());
-			changeOutput.setText(Integer.toString(model.getChangeAmount()));
+			
 		}else {
 			drinkOutput.setText("");
-			changeOutput.setText("");
+
 		}
+		changeOutput.setText(Integer.toString(model.getChangeAmount()));
 
 		changeInfo.setText(model.canGetChange() ? "Cet machine rend la monnaie" : "Cet machine ne rend pas la monnaie");
 		creditInfo.setText("Vous disposer d'un credit de " + model.getCreditAmount() + " cents");
@@ -160,16 +158,16 @@ public class DrinksMachine {
 			public void actionPerformed (ActionEvent e){
 				JButton drinkButton = (JButton) e.getSource();
 				String drink_name = drinkButton.getText();
-				System.out.println("bouton appuiye" + drink_name);
+
 				DrinkTypes selectedDrink = null;
 				for (DrinkTypes drink : DrinkTypes.values()){
-					System.out.println("boisson " + drink.toString());
+
 					if(drink.toString().equals(drink_name) ){
 						selectedDrink = drink;
 						break;
 					}
 				}
-				System.out.println("boisson trouvé " + selectedDrink);
+
 				if ( model.getCreditAmount() >= selectedDrink.getPrice()){
 					if (model.getLastDrink() != null){
 						JOptionPane.showMessageDialog(
@@ -200,8 +198,17 @@ public class DrinksMachine {
 		ActionListener insertCoinListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e){
+
+				if (model.getLastDrink() != null){
+					JOptionPane.showMessageDialog(
+							null, 
+							"Veillez recuperer la boisson que vous avez deja commander",
+							"Erreur !",
+							JOptionPane.ERROR_MESSAGE
+                    	);
+						return;
+				}
 				String cointText = coinInput.getText();
-				System.out.println("insertCoinListener "+ cointText);
 				if (cointText == null  || !cointText.matches("[\\d]+")){
 					JOptionPane.showMessageDialog(
 							null, 
@@ -234,6 +241,7 @@ public class DrinksMachine {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				model.cancelCredit();
 			}
 		}); 
@@ -243,6 +251,15 @@ public class DrinksMachine {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (model.getLastDrink() == null && model.getChangeAmount() == 0){
+					JOptionPane.showMessageDialog(
+						null, 
+						"Veillez selectionner un boisson d'abords",
+						"Erreur !",
+						JOptionPane.ERROR_MESSAGE
+					);
+					return;
+				}
 				model.takeDrink();
 				model.takeChange();
 				
@@ -265,7 +282,6 @@ public class DrinksMachine {
 		for (CoinTypes c : CoinTypes.values()){
 			model.fillCash(c, 5);
 		}
-		System.out.println(model.canGetChange());
 	}
 
 	private void createView(){
