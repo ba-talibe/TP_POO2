@@ -1,6 +1,8 @@
-package serie02.model;
+package serie10.model;
 
 import java.io.BufferedInputStream;
+import java.util.Observable;
+import java.util.Observer;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +17,7 @@ import java.math.*;
 import java.util.*;
 import util.Contract;
 
-public class StdSplitManager implements SplitManager {
+public class StdSplitManager extends Observable implements SplitManager {
 
 	private File file;
 	private List<Long> sizes ;
@@ -96,11 +98,18 @@ public class StdSplitManager implements SplitManager {
 		}
 
 		this.sizes.add(f.length());
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
 	public void close() {
 		this.file = null;
+		this.sizes.clear();
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
@@ -116,6 +125,9 @@ public class StdSplitManager implements SplitManager {
 		for (int i=(int)r; i <splitsNb; i++) {
 			this.sizes.add(q);
 		}
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
@@ -131,6 +143,9 @@ public class StdSplitManager implements SplitManager {
 			this.sizes.add(size);
 		}
 		this.sizes.add((int) splitsNb-1, (r == 0) ? size : (long) r);
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	private long sumSizes(long[] sizes){
@@ -182,6 +197,9 @@ public class StdSplitManager implements SplitManager {
 			this.sizes.add(sizes.length -1, n - sum);
 		}
 		//System.out.println("setSplitsSizes long[] " + sizes + " size " + this.sizes);
+		
+		setChanged();
+		notifyObservers();
 	}
 
 	private InputStream createInputStream() throws FileNotFoundException{
@@ -220,8 +238,11 @@ public class StdSplitManager implements SplitManager {
 			System.out.println(e.getMessage());
 		}
 		
-		
+		setChanged();
+		notifyObservers();
 	}
+	
+	
 }
 
 
